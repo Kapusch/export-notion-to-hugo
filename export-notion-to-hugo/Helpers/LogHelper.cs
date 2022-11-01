@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+namespace Helpers;
 
 public static class LogHelper
 {
