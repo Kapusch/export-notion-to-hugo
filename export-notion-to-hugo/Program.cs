@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Helpers;
 using Models;
+using Notion.Client;
 using Services;
 
 LogHelper.PrintStart();
@@ -18,13 +19,7 @@ try
     {
         string markdown = await notionAPI.ExportPageToMarkdown(page);
 
-        string pageTitle = String.Empty;
-        if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Title"], out var parsedTitle))
-        {
-            pageTitle = parsedTitle;
-        }
-
-        string outputDirectory = Path.Combine(parameters.TmpFolder, pageTitle ?? page.Id);
+        string outputDirectory = BuildOutputDirectory(parameters.TmpFolder, page);
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
@@ -67,4 +62,38 @@ void Exit()
 {
     Console.ReadKey(true);
     Environment.Exit(0);
+}
+
+string BuildOutputDirectory(string baseOutput, Page page)
+{
+    string pageIndex = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Index"], out var parsedPageIndex))
+    {
+        pageIndex = parsedPageIndex + "-";
+    }
+
+    string pageTitle = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Title"], out var parsedTitle))
+    {
+        pageTitle = parsedTitle;
+    }
+
+    string pageCategory = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Category"], out var parsedCategory))
+    {
+        pageCategory = parsedCategory;
+    }
+
+    string pageSubcategory = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Subcategory"], out var parsedSubcategory))
+    {
+        pageSubcategory = parsedSubcategory;
+    }
+
+    return
+        Path.Combine(baseOutput,
+        "posts",
+        pageCategory ?? "Misc",
+        pageSubcategory,
+        pageIndex + (pageTitle ?? page.Id));
 }

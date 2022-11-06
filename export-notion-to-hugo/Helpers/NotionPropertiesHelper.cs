@@ -25,6 +25,9 @@ namespace Helpers
                 case SelectPropertyValue selectPropertyValue:
                     text = selectPropertyValue.Select.Name;
                     break;
+                case NumberPropertyValue numberPropertyValue:
+                    text = numberPropertyValue.Number?.ToString();
+                    break;
 
                 default:
                     return false;
