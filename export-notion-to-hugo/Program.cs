@@ -16,24 +16,41 @@ try
     var pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId);
     foreach (var page in pagesRetrievedFromNotion.Results)
     {
+        string markdown = await notionAPI.ExportPageToMarkdown(page);
 
-        string tmp = await notionAPI.ExportPageToMarkdown(page);
-        break;
+        string pageTitle = String.Empty;
+        if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Title"], out var parsedTitle))
+        {
+            pageTitle = parsedTitle;
+        }
 
+        string outputDirectory = Path.Combine(parameters.TmpFolder, pageTitle ?? page.Id);
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
 
-        //var outputDirectory = BuildOutputDirectory(title, language);
-        //if (!Directory.Exists(outputDirectory))
-        //{
-        //    Directory.CreateDirectory(outputDirectory);
-        //}
+        string languageCode = String.Empty;
+        if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Language"], out var parsedLanguage))
+        {
+            switch (parsedLanguage)
+            {
+                case "French":
+                    languageCode = ".fr";
+                    break;
+                case "English":
+                    languageCode = ".en";
+                    break;
+            }
+        }
 
-        //using (var fileStream = File.OpenWrite($"{outputDirectory}/index.markdown"))
-        //{
-        //    using (var streamWriter = new StreamWriter(fileStream, new UTF8Encoding(false)))
-        //    {
-        //        await streamWriter.WriteAsync(stringBuilder.ToString());
-        //    }
-        //}
+        using (var fileStream = File.OpenWrite($"{outputDirectory}/index{languageCode}.md"))
+        {
+            using (var streamWriter = new StreamWriter(fileStream, new UTF8Encoding(false)))
+            {
+                await streamWriter.WriteAsync(markdown);
+            }
+        }
     }
 }
 catch (Exception ex)
