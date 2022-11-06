@@ -6,7 +6,7 @@ using Services;
 
 LogHelper.PrintStart();
 
-Parameters parameters = null;
+Arguments parameters = null;
 NotionAPI notionAPI;
 
 try
@@ -14,16 +14,16 @@ try
     parameters = CommandLineArgumentsHelper.ParseCommandLineArguments(args);
     notionAPI = new(parameters.NotionApiToken);
 
-    var pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId);
+    var pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId, parameters.Status);
     foreach (var page in pagesRetrievedFromNotion.Results)
     {
-        string markdown = await notionAPI.ExportPageToMarkdown(page);
-
         string outputDirectory = BuildOutputDirectory(parameters.TmpFolder, page);
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
+
+        string markdown = await notionAPI.ExportPageToMarkdown(page, outputDirectory);
 
         string languageCode = String.Empty;
         if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Language"], out var parsedLanguage))

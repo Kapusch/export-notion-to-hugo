@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using Helpers;
+using Models;
 using Notion.Client;
 
 namespace Services;
@@ -21,34 +22,67 @@ public class NotionAPI
         });
     }
 
-    public async Task<PaginatedList<Page>> GetPagesFromDatabase(string databaseId)
+    public async Task<PaginatedList<Page>> GetPagesFromDatabase(string databaseId, string pageStatusFilter)
     {
-        var statusFilter = new StatusFilter("Status", equal: "Published");
+        var statusFilter = new StatusFilter("Status", equal: pageStatusFilter);
 
         var queryParams = new DatabasesQueryParameters { Filter = statusFilter };
         return await client.Databases.QueryAsync(databaseId, queryParams);
     }
 
-    public async Task<string> ExportPageToMarkdown(Page page)
+    public async Task<string> ExportPageToMarkdown(Page page, string outputDirectory)
     {
-        // build frontmatter
-
         var stringBuilder = new StringBuilder();
+
+        #region Front Matter
         stringBuilder.AppendLine("---");
 
-        //foreach (var property in page.Properties)
-        //{
-        // Parse the properties from expected parameters
-        // Format the FrontMatterProperty in .TOML
-        // stringBuilder.AppendLine($"{nameof(Paremeters.Title)}: \"{paremeters.Title}\"");
-        //}
+        var defaultProperties = Enum.GetNames<Properties>();
+        foreach (var defaultProperty in defaultProperties)
+        {
+            if(page.Properties.Any(q => q.Key.Equals(defaultProperty)))
+            {
+                var pageProperty = page.Properties.First(q => q.Key.Equals(defaultProperty));
+
+                string parsedValue = String.Empty;
+                switch (Enum.Parse<Properties>(defaultProperty))
+                {
+                    case Properties.Title:
+                    case Properties.Category:
+                    case Properties.Subcategory:
+                    case Properties.Description:
+                    case Properties.Language:
+                        if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
+                        {
+                            parsedValue = $"\'{plainText}\'";
+                        }
+                        break;
+                    case Properties.PublishDate:
+                        if (NotionPropertiesHelper.TryParseAsDateTime(pageProperty.Value, out var dateTime))
+                        {
+                            parsedValue = $"\'{dateTime.ToString("u")}\'";
+                        }
+                        break;
+                    case Properties.Tags:
+                        if (NotionPropertiesHelper.TryParseAsStringSet(pageProperty.Value, out var parsedTags))
+                        {
+                            var tags = parsedTags.Select(tag => $"\"{tag}\"").ToList();
+                            parsedValue = $"[{string.Join(',', tags)}]";
+                        }
+                        break;
+                }
+
+                stringBuilder.AppendLine($"{defaultProperty}: {parsedValue}");
+            }
+        }
+
+        stringBuilder.AppendLine("draft: false");
 
         stringBuilder.AppendLine("---");
         stringBuilder.AppendLine("");
+        #endregion
 
-        string outputDirectory = "";
-
-        // page content
+        #region Main Content
         var paginatedBlocks = await client.Blocks.RetrieveChildrenAsync(page.Id);
         do
         {
@@ -67,6 +101,7 @@ public class NotionAPI
                 StartCursor = paginatedBlocks.NextCursor,
             });
         } while (true);
+        #endregion
 
         return stringBuilder.ToString();
     }
@@ -109,10 +144,10 @@ public class NotionAPI
                 }
                 stringBuilder.AppendLine(string.Empty);
                 break;
-            //case ImageBlock imageBlock:
-            //    await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder);
-            //    stringBuilder.AppendLine(string.Empty);
-            //    break;
+            case ImageBlock imageBlock:
+                await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder);
+                stringBuilder.AppendLine(string.Empty);
+                break;
             case CodeBlock codeBlock:
                 AppendCode(codeBlock, indent, stringBuilder);
                 stringBuilder.AppendLine(string.Empty);
@@ -187,6 +222,7 @@ public class NotionAPI
 
     async Task AppendImageAsync(ImageBlock imageBlock, string indent, string outputDirectory, StringBuilder stringBuilder)
     {
+        outputDirectory = Path.Combine(outputDirectory, "images");
         var url = string.Empty;
         switch (imageBlock.Image)
         {
@@ -201,7 +237,7 @@ public class NotionAPI
         if (!string.IsNullOrEmpty(url))
         {
             var (fileName, _) = await DownloadImage(url, outputDirectory);
-            stringBuilder.Append($"{indent}![](./{fileName})");
+            stringBuilder.Append($"{indent}![](./images/{fileName})");
         }
     }
 
@@ -212,7 +248,11 @@ public class NotionAPI
         {
             var input = Encoding.UTF8.GetBytes(uri.LocalPath);
             var fileName = $"{Convert.ToHexString(md5.ComputeHash(input))}{Path.GetExtension(uri.LocalPath)}";
-            var filePath = $"{outputDirectory}/{fileName}";
+            var filePath = Path.Combine(outputDirectory, fileName);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
             HttpClient client = new HttpClient();
             client.MaxResponseContentBufferSize = 100000000; // ~100 Mo

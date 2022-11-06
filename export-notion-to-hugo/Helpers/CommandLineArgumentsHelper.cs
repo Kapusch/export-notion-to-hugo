@@ -12,9 +12,9 @@ public static class CommandLineArgumentsHelper
     /// <param name="arguments"></param>
     /// <returns>Parsed parameters</returns>
     /// <exception cref="ArgumentException">Something wrong happen when parsing arguments</exception>
-    public static Parameters ParseCommandLineArguments(string[] arguments)
+    public static Arguments ParseCommandLineArguments(string[] arguments)
     {
-        Parameters parameters = new();
+        Arguments parameters = new();
         var parameterNames = (parameters.GetType()).GetProperties().Select(q => q.Name);
 
         // There is one optional parameter

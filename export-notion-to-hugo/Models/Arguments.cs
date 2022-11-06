@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Models;
 
-public class Parameters
+public class Arguments
 {
     public string TmpFolder { get; set; }
         = Path.Combine(
