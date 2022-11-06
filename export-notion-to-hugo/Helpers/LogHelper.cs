@@ -39,20 +39,34 @@ public static class LogHelper
 
     static string FormatMessage(string message, string separator = SERAPATOR_LINE_1)
     {
-        if(message.Length > separator.Length)
+        StringBuilder formattedMessage = new();
+        int patternLength;
+
+        while (message.Length > separator.Length)
         {
-            message = message.Substring(0, separator.Length - 5);
-            message += "[...]";
+            int splitIndex = message.Substring(0, separator.Length).LastIndexOf(' ');
+
+            if (splitIndex == -1) splitIndex = separator.Length;
+
+            string nextLine = message.Substring(0, splitIndex);
+
+            patternLength = (separator.Length - nextLine.Length) / 2;
+
+            formattedMessage.AppendLine(
+                String.Format("{0}{1}{2}",
+                    separator.Substring(0, patternLength),
+                    nextLine,
+                    separator.Substring(patternLength + nextLine.Length)));
+
+            message = message.Remove(0, splitIndex + 1);
         }
 
-        StringBuilder formattedMessage = new StringBuilder(separator);
-
-        int patternLength = (separator.Length - message.Length) / 2;
-
-        for (int i = 0; i < message.Length; i++)
-        {
-            formattedMessage[i + patternLength] = message[i];
-        }
+        patternLength = (separator.Length - message.Length) / 2;
+        formattedMessage.Append(
+            String.Format("{0}{1}{2}",
+                separator.Substring(0, patternLength),
+                message,
+                separator.Substring(patternLength + message.Length)));
 
         return formattedMessage.ToString();
     }

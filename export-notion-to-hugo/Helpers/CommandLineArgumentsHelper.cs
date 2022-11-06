@@ -17,26 +17,24 @@ public static class CommandLineArgumentsHelper
         Parameters parameters = new();
         var parameterNames = (parameters.GetType()).GetProperties().Select(q => q.Name);
 
-        if (arguments.Length != 4)
+        // There is one optional parameter
+        if (arguments.Length != parameterNames.Count()-1)
         {
-            LogHelper.PrintError($"{arguments.Length} found arguments instead of 4");
-            throw new ArgumentException();
+            throw new ArgumentException($"{arguments.Length} found arguments instead of 4");
         }
 
         foreach (var argument in arguments)
         {
             if (!parameterNames.Any(parameterName => argument.StartsWith(parameterName)))
             {
-                LogHelper.PrintError($"Unexpected argument: {argument}");
-                throw new ArgumentException();
+                throw new ArgumentException($"Unexpected argument: {argument}");
             }
             else
             {
                 var parameterName = parameterNames.First(parameterName => argument.StartsWith(parameterName));
                 if (argument.IndexOf('=') == -1)
                 {
-                    LogHelper.PrintError($"Cannot parse value for argument: {parameterName}");
-                    throw new ArgumentException();
+                    throw new ArgumentException($"Cannot parse value for argument: {parameterName}");
                 }
                 else
                 {

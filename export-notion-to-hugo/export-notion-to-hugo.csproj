@@ -6,17 +6,26 @@
     <RootNamespace>export_notion_to_hugo</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>55682081-069e-4e5f-a61a-88d0a8055e89</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>6</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Helpers\" />
     <None Remove="Models\" />
+    <None Remove="Services\" />
+    <None Remove="Microsoft.Extensions.Configuration.UserSecrets" />
+    <None Remove="Notion.Net" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />
     <Folder Include="Models\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
+    <PackageReference Include="Notion.Net" Version="4.0.0" />
   </ItemGroup>
 </Project>
