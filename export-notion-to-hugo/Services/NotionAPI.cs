@@ -158,6 +158,9 @@ public class NotionAPI
             case NumberedListItemBlock numberedListItemBlock:
                 AppendNumberedListItem(numberedListItemBlock, indent, stringBuilder);
                 break;
+            case CalloutBlock calloutBlock:
+                AppendCallout(calloutBlock, indent, stringBuilder);
+                break;
         }
 
         stringBuilder.AppendLine(string.Empty);
@@ -309,6 +312,35 @@ public class NotionAPI
         {
             AppendRichText(item, stringBuilder);
         }
+    }
+
+    /// <summary>
+    /// Converting Notion Callout blocks into a custom Hugo shortcode syntax
+    /// with the following library: https://github.com/mr-islam/hugo-callout
+    /// </summary>
+    /// <param name="calloutBlock"></param>
+    /// <param name="indent"></param>
+    /// <param name="stringBuilder"></param>
+    void AppendCallout(CalloutBlock calloutBlock, string indent, StringBuilder stringBuilder)
+    {
+        stringBuilder.AppendLine(string.Empty);
+
+        StringBuilder calloutText = new();
+        string emoji = String.Empty;
+
+        if (calloutBlock.Callout.Icon is EmojiObject)
+        {
+            emoji = (calloutBlock.Callout.Icon as EmojiObject).Emoji;
+        }
+
+        foreach (var richText in calloutBlock.Callout.RichText)
+        {
+            AppendRichText(richText, calloutText);
+        }
+
+        string text = calloutText.ToString();
+        stringBuilder.AppendLine($"{indent}{{{{< callout emoji=\"{emoji}\" text=\"{text}\" >}}}}");
+        stringBuilder.AppendLine(string.Empty);
     }
 
     #endregion
