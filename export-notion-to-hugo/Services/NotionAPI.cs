@@ -30,7 +30,7 @@ public class NotionAPI
         return await client.Databases.QueryAsync(databaseId, queryParams);
     }
 
-    public async Task<string> ExportPageToMarkdown(Page page, string outputDirectory)
+    public async Task<string> ExportPageToMarkdown(Page page, string outputDirectory, bool centerImages = true)
     {
         var stringBuilder = new StringBuilder();
 
@@ -79,7 +79,18 @@ public class NotionAPI
         stringBuilder.AppendLine("draft: false");
 
         stringBuilder.AppendLine("---");
-        stringBuilder.AppendLine("");
+        stringBuilder.AppendLine(String.Empty);
+        #endregion
+
+        #region Internal CSS
+
+        stringBuilder.AppendLine("<style>");
+        if (centerImages)
+        {
+            stringBuilder.AppendLine(".img-sizes{min-height:50px;max-height:600px;min-width:50px;max-width:600px;height:auto;width:auto}");
+        }
+        stringBuilder.AppendLine("</style>");
+
         #endregion
 
         #region Main Content
@@ -88,7 +99,7 @@ public class NotionAPI
         {
             foreach (Block block in paginatedBlocks.Results)
             {
-                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder);
+                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages);
             }
 
             if (!paginatedBlocks.HasMore)
@@ -108,7 +119,7 @@ public class NotionAPI
 
     #region MarkDown Helpers
 
-    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder)
+    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages)
     {
         switch (block)
         {
@@ -145,7 +156,7 @@ public class NotionAPI
                 stringBuilder.AppendLine(string.Empty);
                 break;
             case ImageBlock imageBlock:
-                await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder);
+                await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder, centerImages);
                 stringBuilder.AppendLine(string.Empty);
                 break;
             case CodeBlock codeBlock:
@@ -172,7 +183,7 @@ public class NotionAPI
             {
                 foreach (Block childBlock in pagination.Results)
                 {
-                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder);
+                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder, centerImages);
                 }
 
                 if (!pagination.HasMore)
@@ -223,7 +234,7 @@ public class NotionAPI
         stringBuilder.Append(text);
     }
 
-    async Task AppendImageAsync(ImageBlock imageBlock, string indent, string outputDirectory, StringBuilder stringBuilder)
+    async Task AppendImageAsync(ImageBlock imageBlock, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages)
     {
         outputDirectory = Path.Combine(outputDirectory, "images");
         var url = string.Empty;
@@ -240,7 +251,14 @@ public class NotionAPI
         if (!string.IsNullOrEmpty(url))
         {
             var (fileName, _) = await DownloadImage(url, outputDirectory);
-            stringBuilder.Append($"{indent}![](./images/{fileName})");
+            if (centerImages)
+            {
+                stringBuilder.Append($"<p align=\"center\"> <img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
+            }
+            else
+            {
+                stringBuilder.Append($"{indent}![](./images/{fileName})");
+            }
         }
     }
 
