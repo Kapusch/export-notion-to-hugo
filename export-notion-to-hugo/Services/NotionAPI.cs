@@ -7,6 +7,7 @@ using System.Text;
 using Helpers;
 using Models;
 using Notion.Client;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Services;
 
@@ -21,6 +22,8 @@ public class NotionAPI
             AuthToken = authorizationToken
         });
     }
+
+    public async Task<Page> GetPageById(string id) => await client.Pages.RetrieveAsync(id);
 
     public async Task<PaginatedList<Page>> GetPagesFromDatabase(string databaseId, string pageStatusFilter)
     {
@@ -172,6 +175,10 @@ public class NotionAPI
             case CalloutBlock calloutBlock:
                 AppendCallout(calloutBlock, indent, stringBuilder);
                 break;
+            case FileBlock fileBlock:
+                await AppendFileAsync(fileBlock, indent, outputDirectory, stringBuilder);
+                stringBuilder.AppendLine(string.Empty);
+                break;
         }
 
         stringBuilder.AppendLine(string.Empty);
@@ -250,10 +257,10 @@ public class NotionAPI
 
         if (!string.IsNullOrEmpty(url))
         {
-            var (fileName, _) = await DownloadImage(url, outputDirectory);
+            var (fileName, _) = await DownloadFile(url, outputDirectory);
             if (centerImages)
             {
-                stringBuilder.Append($"<p align=\"center\"> <img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
+                stringBuilder.Append($"<p align=\"center\"><img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
             }
             else
             {
@@ -262,13 +269,16 @@ public class NotionAPI
         }
     }
 
-    async Task<(string, string)> DownloadImage(string url, string outputDirectory)
+    async Task<(string, string)> DownloadFile(string url, string outputDirectory, string renamedFile = "")
     {
         var uri = new Uri(url);
         using (var md5 = MD5.Create())
         {
             var input = Encoding.UTF8.GetBytes(uri.LocalPath);
-            var fileName = $"{Convert.ToHexString(md5.ComputeHash(input))}{Path.GetExtension(uri.LocalPath)}";
+            var fileName =
+                String.IsNullOrWhiteSpace(renamedFile)
+                ? $"{Convert.ToHexString(md5.ComputeHash(input))}{Path.GetExtension(uri.LocalPath)}"
+                : renamedFile; 
             var filePath = Path.Combine(outputDirectory, fileName);
             if (!Directory.Exists(outputDirectory))
             {
@@ -282,8 +292,8 @@ public class NotionAPI
             {
                 if(httpResponse.StatusCode is HttpStatusCode.OK)
                 {
-                    var downloadedImage = await httpResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                    File.WriteAllBytes(filePath, downloadedImage);
+                    var downloadedFile = await httpResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                    File.WriteAllBytes(filePath, downloadedFile);
                 }
                 else
                     return (null, null);
@@ -333,7 +343,7 @@ public class NotionAPI
     }
 
     /// <summary>
-    /// Converting Notion Callout blocks into a custom Hugo shortcode syntax
+    /// Converting Notion Callout block into a custom Hugo shortcode syntax
     /// with the following library: https://github.com/mr-islam/hugo-callout
     /// </summary>
     /// <param name="calloutBlock"></param>
@@ -359,6 +369,47 @@ public class NotionAPI
         string text = calloutText.ToString();
         stringBuilder.AppendLine($"{indent}{{{{< callout emoji=\"{emoji}\" text=\"{text}\" >}}}}");
         stringBuilder.AppendLine(string.Empty);
+    }
+
+    /// <summary>
+    /// Converting Notion File block into a custom Hugo shortcode syntax
+    /// from the following theme: https://github.com/hugo-fixit
+    /// </summary>
+    /// <param name="fileBlock"></param>
+    /// <param name="indent"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="stringBuilder"></param>
+    async Task AppendFileAsync(FileBlock fileBlock, string indent, string outputDirectory, StringBuilder stringBuilder)
+    {
+        outputDirectory = Path.Combine(outputDirectory, "files");
+        string url = String.Empty;
+
+        switch (fileBlock.File)
+        {
+            case ExternalFile externalFile:
+                url = externalFile.External.Url;
+                break;
+            case UploadedFile uploadedFile:
+                url = uploadedFile.File.Url;
+                break;
+        }
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            int start = url.LastIndexOf('/') + 1;
+            int end = url.IndexOf('?') - start;
+            string fileName = url.Substring(start, end);
+
+            await DownloadFile(url, outputDirectory, fileName);
+
+            stringBuilder.AppendLine(
+                $"{indent}{{{{< link " +
+                $"href=\"./files/{fileName}\" " +
+                $"content=\"{fileName}\" " +
+                $"title=\"Download {fileName}\" " +
+                $"download=\"{fileName}\" " +
+                $"card=true >}}}}");
+        }
     }
 
     #endregion

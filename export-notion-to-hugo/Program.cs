@@ -14,8 +14,12 @@ try
     parameters = CommandLineArgumentsHelper.ParseCommandLineArguments(args);
     notionAPI = new(parameters.NotionApiToken);
 
+    List<Page> test = null;
+    // NOTE: Uncomment for debugging a specific page export
+    //test.Add(await notionAPI.GetPageById("24e6a22c6ee541ef9e4e0708f7d7da18"));
+
     var pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId, parameters.Status);
-    foreach (var page in pagesRetrievedFromNotion.Results)
+    foreach (var page in test ?? pagesRetrievedFromNotion.Results)
     {
         string outputDirectory = BuildOutputDirectory(parameters.TmpFolder, page);
         if (!Directory.Exists(outputDirectory))
