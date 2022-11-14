@@ -35,6 +35,7 @@ public class NotionAPI
 
     public async Task<string> ExportPageToMarkdown(Page page, string outputDirectory, bool centerImages = true)
     {
+        bool useDescriptionAsSummary = false;
         var stringBuilder = new StringBuilder();
 
         #region Front Matter
@@ -53,7 +54,6 @@ public class NotionAPI
                     case Properties.Title:
                     case Properties.Category:
                     case Properties.Subcategory:
-                    case Properties.Description:
                     case Properties.Language:
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
                         {
@@ -73,6 +73,14 @@ public class NotionAPI
                             parsedValue = $"[{string.Join(',', tags)}]";
                         }
                         break;
+                    case Properties.Description:
+                        if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainTextDescription))
+                        {
+                            parsedValue = $"\'{plainTextDescription}\'";
+                        }
+
+                        useDescriptionAsSummary = !(String.IsNullOrWhiteSpace(plainTextDescription));
+                        break;
                 }
 
                 stringBuilder.AppendLine($"{defaultProperty}: {parsedValue}");
@@ -83,6 +91,12 @@ public class NotionAPI
 
         stringBuilder.AppendLine("---");
         stringBuilder.AppendLine(String.Empty);
+
+        if (useDescriptionAsSummary)
+        {
+            stringBuilder.AppendLine("<!--more-->");
+            stringBuilder.AppendLine(String.Empty);
+        }
         #endregion
 
         #region Internal CSS
