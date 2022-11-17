@@ -87,6 +87,16 @@ public class NotionAPI
             }
         }
 
+        if(page.Cover != null)
+        {
+            string fileName = await DownloadCover(page.Cover, outputDirectory);
+            string fileNameWithoutExtension = fileName.Replace(Path.GetExtension(fileName), String.Empty);
+
+            stringBuilder.AppendLine("resources:");
+            stringBuilder.AppendLine($"- name: '{fileNameWithoutExtension}'");
+            stringBuilder.AppendLine($"  src: '{fileName}'");
+        }
+
         stringBuilder.AppendLine("draft: false");
 
         stringBuilder.AppendLine("---");
@@ -424,6 +434,41 @@ public class NotionAPI
                 $"download=\"{fileName}\" " +
                 $"card=true >}}}}");
         }
+    }
+
+    /// <summary>
+    /// Download cover image
+    /// </summary>
+    /// <param name="coverImage"></param>
+    /// <param name="outputDirectory"></param>
+    /// <returns>the file name</returns>
+    async Task<string> DownloadCover(FileObject coverImage, string outputDirectory)
+    {
+        string url = String.Empty;
+        string fileName = String.Empty;
+
+        switch (coverImage)
+        {
+            case ExternalFile externalFile:
+                url = externalFile.External.Url;
+                break;
+            case UploadedFile uploadedFile:
+                url = uploadedFile.File.Url;
+                break;
+        }
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            int start = url.LastIndexOf('/') + 1;
+            int end = url.IndexOf('?') - start;
+            string fileNameExtension = Path.GetExtension(url.Substring(start, end));
+
+            fileName = "featured-image-preview" + fileNameExtension;
+
+            await DownloadFile(url, outputDirectory, fileName);
+        }
+
+        return fileName;
     }
 
     #endregion
