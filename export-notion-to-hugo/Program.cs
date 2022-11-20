@@ -51,6 +51,8 @@ try
             }
         }
     }
+
+    AddIndexFiles(parameters.TmpFolder);
 }
 catch (Exception ex)
 {
@@ -100,4 +102,55 @@ string BuildOutputDirectory(string baseOutput, Page page)
         pageCategory ?? "Misc",
         pageSubcategory,
         pageIndex + (pageTitle ?? page.Id));
+}
+
+/// <summary>
+/// Create the index file for each category and subcategories
+/// </summary>
+/// <param name="baseOutput"></param>
+void AddIndexFiles(string baseOutput)
+{
+    string outputDirectory = Path.Combine(baseOutput, "posts");
+
+    foreach (var categoryFolder in Directory.GetDirectories(outputDirectory))
+    {
+        string category =
+            Path.GetFileName(categoryFolder)
+            ?? throw new ApplicationException("Not a valid directory name");
+
+        AddIndexFile(categoryFolder, category);
+
+        foreach (var subcategoryFolder in Directory.GetDirectories(categoryFolder))
+        {
+            string subcategory =
+                Path.GetFileName(subcategoryFolder)
+                ?? throw new ApplicationException("Not a valid directory name");
+
+            AddIndexFile(subcategoryFolder, subcategory);
+        }
+    }
+}
+
+/// <summary>
+/// Add an index file in order to list folder content
+/// </summary>
+/// <param name="outputDirectory"></param>
+/// <param name="title"></param>
+void AddIndexFile(string outputDirectory, string title)
+{
+    var stringBuilder = new StringBuilder();
+    stringBuilder.AppendLine("---");
+    stringBuilder.AppendLine($"Title: {title}");
+    stringBuilder.AppendLine("draft: false");
+    stringBuilder.AppendLine("---");
+    stringBuilder.AppendLine(String.Empty);
+
+
+    using (var fileStream = File.OpenWrite($"{outputDirectory}/_index.md"))
+    {
+        using (var streamWriter = new StreamWriter(fileStream, new UTF8Encoding(false)))
+        {
+            streamWriter.Write(stringBuilder.ToString());
+        }
+    }
 }

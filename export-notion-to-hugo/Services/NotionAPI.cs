@@ -90,7 +90,7 @@ public class NotionAPI
         if(page.Cover != null)
         {
             string fileName = await DownloadCover(page.Cover, outputDirectory);
-            string fileNameWithoutExtension = fileName.Replace(Path.GetExtension(fileName), String.Empty);
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
 
             stringBuilder.AppendLine("resources:");
             stringBuilder.AppendLine($"- name: '{fileNameWithoutExtension}'");
