@@ -7,7 +7,7 @@ public static class CommandLineArgumentsHelper
 {
     /// <summary>
     /// Parse command line arguments when running the program as below:
-    /// dotnet run "Username=user@email.com" "Password=1234" "DatabaseID=12345abcde" "Status=published"
+    /// dotnet run "NotionApiToken={YOUR_SECRET_TOKEN}" "DatabaseId={YOUR_DATABASE_ID}" "Status={YOUR_PAGE_STATUS}" "TmpFolder={YOUR_FOLDER_PATH}"
     /// </summary>
     /// <param name="arguments"></param>
     /// <returns>Parsed parameters</returns>
@@ -20,7 +20,7 @@ public static class CommandLineArgumentsHelper
         // There is one optional parameter
         if (arguments.Length != parameterNames.Count()-1)
         {
-            throw new ArgumentException($"{arguments.Length} found arguments instead of 4");
+            throw new ArgumentException($"{arguments.Length} found arguments instead of 3");
         }
 
         foreach (var argument in arguments)
