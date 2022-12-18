@@ -3,6 +3,7 @@ namespace Models
 {
     enum Properties
     {
+        Topic,
         Title,
         Category,
         Subcategory,

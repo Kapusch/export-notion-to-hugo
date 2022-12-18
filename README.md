@@ -12,6 +12,7 @@ Before getting started, you need to prepare some parameters:
 
 ### Notion page properties
 The program is optimized to work with a minimum set of properties from your Notion pages (the property type is mentioned in parenthesis):
+- (Topic) **Topic**: the topic of your post (used as the folder name),
 - (Title) **Title**: the title of your post,
 - (Select) **Category**: the main category of your post,
 - (Select) **Subcategory**: the subcategory of your post,

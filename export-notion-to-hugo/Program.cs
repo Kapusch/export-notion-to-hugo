@@ -78,10 +78,10 @@ string BuildOutputDirectory(string baseOutput, Page page)
         pageIndex = parsedPageIndex + "-";
     }
 
-    string pageTitle = String.Empty;
-    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Title"], out var parsedTitle))
+    string pageTopic = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties["Topic"], out var parsedTopic))
     {
-        pageTitle = parsedTitle;
+        pageTopic = parsedTopic;
     }
 
     string pageCategory = String.Empty;
@@ -101,7 +101,7 @@ string BuildOutputDirectory(string baseOutput, Page page)
         "posts",
         pageCategory ?? "Misc",
         pageSubcategory,
-        pageIndex + (pageTitle ?? page.Id));
+        pageIndex + (pageTopic ?? page.Id));
 }
 
 /// <summary>
