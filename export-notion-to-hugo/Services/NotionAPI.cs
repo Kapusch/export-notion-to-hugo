@@ -58,13 +58,13 @@ public class NotionAPI
                     case Properties.Language:
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
                         {
-                            parsedValue = $"\'{plainText}\'";
+                            parsedValue = $"\"{plainText}\"";
                         }
                         break;
                     case Properties.PublishDate:
                         if (NotionPropertiesHelper.TryParseAsDateTime(pageProperty.Value, out var dateTime))
                         {
-                            parsedValue = $"\'{dateTime.ToString("u")}\'";
+                            parsedValue = $"\"{dateTime.ToString("u")}\"";
                         }
                         break;
                     case Properties.Tags:
@@ -77,7 +77,7 @@ public class NotionAPI
                     case Properties.Description:
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainTextDescription))
                         {
-                            parsedValue = $"\'{plainTextDescription}\'";
+                            parsedValue = $"\"{plainTextDescription}\"";
                         }
 
                         useDescriptionAsSummary = !(String.IsNullOrWhiteSpace(plainTextDescription));
