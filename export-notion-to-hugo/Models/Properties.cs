@@ -7,6 +7,7 @@ namespace Models
         Title,
         Category,
         Subcategory,
+        Index,
         PublishDate,
         Language,
         Description,

@@ -75,6 +75,13 @@ public class NotionAPI
                     case Properties.PublishDate:
                         if (NotionPropertiesHelper.TryParseAsDateTime(pageProperty.Value, out var dateTime))
                         {
+                            // If the page has an index, it will be rendered in the published date time
+                            // so that the pages are ordered correctly within a serie.
+                            if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Index.ToString()], out var parsedPageIndex))
+                            {
+                                dateTime = dateTime.AddSeconds(int.Parse(parsedPageIndex));
+                            }
+
                             parsedValue = $"\"{dateTime.ToString("u")}\"";
                         }
                         break;

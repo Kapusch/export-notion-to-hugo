@@ -16,6 +16,7 @@ The program is optimized to work with a minimum set of properties from your Noti
 - (Title) **Title**: the title of your post,
 - (Select) **Category**: the main category of your post,
 - (Select) **Subcategory**: the subcategory of your post,
+- (Integer) **Index**: the index of your post in a specific serie (especially useful when several posts have the same PublishDate),
 - (Date) **PublishDate**: the date when to publish your post,
 - (Select) **Language**: the language of post ("French" or "English"),
 - (Text) **Description**: summary of your post,
