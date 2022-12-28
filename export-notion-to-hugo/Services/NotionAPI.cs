@@ -37,6 +37,7 @@ public class NotionAPI
     {
         bool useDescriptionAsSummary = false;
         var stringBuilder = new StringBuilder();
+        string languageCode = String.Empty;
 
         #region Front Matter
         stringBuilder.AppendLine("---");
@@ -59,6 +60,16 @@ public class NotionAPI
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
                         {
                             parsedValue = $"\"{plainText}\"";
+
+                            switch (plainText)
+                            {
+                                case "French":
+                                    languageCode = "fr";
+                                    break;
+                                case "English":
+                                    languageCode = "en";
+                                    break;
+                            }
                         }
                         break;
                     case Properties.PublishDate:
@@ -90,9 +101,10 @@ public class NotionAPI
 
         if(page.Cover != null)
         {
-            string fileName = await DownloadCover(page.Cover, outputDirectory);
+            string fileName = await DownloadCover(page.Cover, outputDirectory, languageCode);
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
 
+            stringBuilder.AppendLine($"featuredImagePreview: '{fileNameWithoutExtension}'");
             stringBuilder.AppendLine("resources:");
             stringBuilder.AppendLine($"- name: '{fileNameWithoutExtension}'");
             stringBuilder.AppendLine($"  src: '{fileName}'");
@@ -442,8 +454,9 @@ public class NotionAPI
     /// </summary>
     /// <param name="coverImage"></param>
     /// <param name="outputDirectory"></param>
+    /// <param name="languageCode"></param>
     /// <returns>the file name</returns>
-    async Task<string> DownloadCover(FileObject coverImage, string outputDirectory)
+    async Task<string> DownloadCover(FileObject coverImage, string outputDirectory, string languageCode)
     {
         string url = String.Empty;
         string fileName = String.Empty;
@@ -464,7 +477,7 @@ public class NotionAPI
             int end = url.IndexOf('?') - start;
             string fileNameExtension = Path.GetExtension(url.Substring(start, end));
 
-            fileName = "featured-image-preview" + fileNameExtension;
+            fileName = "featured-image-preview" + $"-{languageCode}" + fileNameExtension;
 
             await DownloadFile(url, outputDirectory, fileName);
         }
