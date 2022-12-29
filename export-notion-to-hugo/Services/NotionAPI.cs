@@ -295,6 +295,10 @@ public class NotionAPI
     {
         outputDirectory = Path.Combine(outputDirectory, "images");
         var url = string.Empty;
+
+        StringBuilder captionText = new();
+        var caption = string.Empty;
+
         switch (imageBlock.Image)
         {
             case ExternalFile externalFile:
@@ -308,14 +312,27 @@ public class NotionAPI
         if (!string.IsNullOrEmpty(url))
         {
             var (fileName, _) = await DownloadFile(url, outputDirectory);
+
+            stringBuilder.Append("<figure>");
+
             if (centerImages)
-            {
-                stringBuilder.Append($"<p align=\"center\"><img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
-            }
+                stringBuilder.Append("<p align=\"center\">");
             else
+                stringBuilder.Append("<p>");
+
+
+            stringBuilder.Append($"<img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
+
+            foreach (var richText in imageBlock.Image.Caption)
             {
-                stringBuilder.Append($"{indent}![](./images/{fileName})");
+                AppendRichText(richText, captionText);
             }
+            caption = captionText.ToString();
+
+            if (!String.IsNullOrWhiteSpace(caption))
+                stringBuilder.Append($"<figcaption class=\"image-caption\">{caption}</figcaption>");
+
+            stringBuilder.Append("</figure>");
         }
     }
 
