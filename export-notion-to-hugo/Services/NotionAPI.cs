@@ -56,12 +56,18 @@ public class NotionAPI
                     case Properties.Title:
                     case Properties.Category:
                     case Properties.Subcategory:
-                    case Properties.Language:
+                    case Properties.Index:
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
                         {
                             parsedValue = $"\"{plainText}\"";
+                        }
+                        break;
+                    case Properties.Language:
+                        if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var parsedLanguageCode))
+                        {
+                            parsedValue = $"\"{parsedLanguageCode}\"";
 
-                            switch (plainText)
+                            switch (parsedLanguageCode)
                             {
                                 case "French":
                                     languageCode = "fr";
@@ -388,7 +394,7 @@ public class NotionAPI
 
     /// <summary>
     /// Converting Notion Callout block into a custom Hugo shortcode syntax
-    /// with the following library: https://github.com/mr-islam/hugo-callout
+    /// from the following theme: https://github.com/hugo-fixit
     /// </summary>
     /// <param name="calloutBlock"></param>
     /// <param name="indent"></param>
@@ -398,21 +404,36 @@ public class NotionAPI
         stringBuilder.AppendLine(string.Empty);
 
         StringBuilder calloutText = new();
-        string emoji = String.Empty;
+        CalloutTypes calloutType = CalloutTypes.note;
 
         if (calloutBlock.Callout.Icon is EmojiObject)
         {
-            emoji = (calloutBlock.Callout.Icon as EmojiObject).Emoji;
+            string emoji = (calloutBlock.Callout.Icon as EmojiObject).Emoji;
+
+            switch (emoji)
+            {
+                case "ℹ️":
+                    calloutType = CalloutTypes.info;
+                    break;
+                case "💡":
+                    calloutType = CalloutTypes.tip;
+                    break;
+                case "🐒":
+                    calloutType = CalloutTypes.comment;
+                    calloutText.Append(emoji + "‎ ‎ ");
+                    break;
+            }
         }
+
+        // NOTE: We need to remove any default title with an empty character unicode
+        stringBuilder.AppendLine($"{indent}{{{{< admonition type={calloutType.ToString()} title=\"‎ \" open=true >}}}}");
 
         foreach (var richText in calloutBlock.Callout.RichText)
         {
             AppendRichText(richText, calloutText);
         }
-
-        string text = calloutText.ToString();
-        stringBuilder.AppendLine($"{indent}{{{{< callout emoji=\"{emoji}\" text=\"{text}\" >}}}}");
-        stringBuilder.AppendLine(string.Empty);
+        stringBuilder.AppendLine($"{indent}{calloutText.ToString()}");
+        stringBuilder.AppendLine($"{indent}{{{{< /admonition >}}}}");
     }
 
     /// <summary>
