@@ -38,6 +38,8 @@ public class NotionAPI
         bool useDescriptionAsSummary = false;
         var stringBuilder = new StringBuilder();
         string languageCode = String.Empty;
+        bool isPartOfSeries = false;
+        string parsedPageSubcategory = String.Empty;
 
         #region Front Matter
         stringBuilder.AppendLine("---");
@@ -56,10 +58,21 @@ public class NotionAPI
                     case Properties.Title:
                     case Properties.Category:
                     case Properties.Subcategory:
-                    case Properties.Index:
                         if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var plainText))
                         {
                             parsedValue = $"\"{plainText}\"";
+                        }
+                        break;
+                    case Properties.Index:
+                        if (NotionPropertiesHelper.TryParseAsPlainText(pageProperty.Value, out var parsedIndex))
+                        {
+                            parsedValue = $"\"{parsedIndex}\"";
+
+                            if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Subcategory.ToString()], out parsedPageSubcategory))
+                            {
+                                isPartOfSeries = true;
+                                stringBuilder.AppendLine($"series: [\"{parsedPageSubcategory}\"]");
+                            }
                         }
                         break;
                     case Properties.Language:
@@ -166,6 +179,20 @@ public class NotionAPI
             });
         } while (true);
         #endregion
+
+        #region Serie table of content
+
+        if (isPartOfSeries)
+        {
+            stringBuilder.AppendLine("---");
+            if(languageCode == "fr")
+                stringBuilder.AppendLine("Plus d'articles dans la même série:");
+            else
+                stringBuilder.AppendLine("More articles in the series:");
+
+            stringBuilder.AppendLine($"{{{{< series \"{parsedPageSubcategory}\" >}}}}");
+        }
+            #endregion
 
         return stringBuilder.ToString();
     }
