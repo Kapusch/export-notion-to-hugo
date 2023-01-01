@@ -249,6 +249,9 @@ public class NotionAPI
             case NumberedListItemBlock numberedListItemBlock:
                 AppendNumberedListItem(numberedListItemBlock, indent, stringBuilder);
                 break;
+            case ToDoBlock todoBlock:
+                AppendTodoListItem(todoBlock, indent, stringBuilder);
+                break;
             case CalloutBlock calloutBlock:
                 AppendCallout(calloutBlock, indent, stringBuilder);
                 break;
@@ -422,6 +425,15 @@ public class NotionAPI
     {
         stringBuilder.Append($"{indent}* ");
         foreach (var item in bulletedListItemBlock.BulletedListItem.RichText)
+        {
+            AppendRichText(item, stringBuilder);
+        }
+    }
+
+    void AppendTodoListItem(ToDoBlock todoBlock, string indent, StringBuilder stringBuilder)
+    {
+        stringBuilder.Append($"{indent}- [ ] ");
+        foreach (var item in todoBlock.ToDo.RichText)
         {
             AppendRichText(item, stringBuilder);
         }
