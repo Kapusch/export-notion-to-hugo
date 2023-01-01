@@ -259,6 +259,17 @@ public class NotionAPI
                 await AppendFileAsync(fileBlock, indent, outputDirectory, stringBuilder);
                 stringBuilder.AppendLine(string.Empty);
                 break;
+            default:
+                string currentPageId = String.Empty;
+
+                if(block.Parent is PageParent)
+                {
+                    currentPageId = ((PageParent)block.Parent).PageId;
+                }
+
+                Console.WriteLine($"Unsupported block at page: [{currentPageId}]");
+                Console.WriteLine($"Block details: [{block}]");
+                break;
         }
 
         stringBuilder.AppendLine(string.Empty);
