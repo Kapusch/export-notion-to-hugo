@@ -413,6 +413,18 @@ public class NotionAPI
 
     void AppendCode(CodeBlock codeBlock, string indent, StringBuilder stringBuilder)
     {
+        // Use Notion codeblock caption as filename
+        if(codeBlock.Code.Caption != null && codeBlock.Code.Caption.Any())
+        {
+            stringBuilder.Append("<p align=\"center\" style=\"margin-bottom:-10px\"><strong>Filename:</strong><code>");
+
+            var fileName = codeBlock.Code.Caption.First();
+            AppendRichText(fileName, stringBuilder);
+
+            stringBuilder.AppendLine("</code></p>");
+            stringBuilder.AppendLine(string.Empty);
+        }
+
         stringBuilder.AppendLine($"{indent}```{NotionCodeLanguageToMarkdownCodeLanguage(codeBlock.Code.Language)}");
         foreach (var richText in codeBlock.Code.RichText)
         {
