@@ -165,7 +165,7 @@ public class NotionAPI
         {
             foreach (Block block in paginatedBlocks.Results)
             {
-                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages);
+                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages, languageCode);
             }
 
             if (!paginatedBlocks.HasMore)
@@ -199,7 +199,7 @@ public class NotionAPI
 
     #region MarkDown Helpers
 
-    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages)
+    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages, string languageCode)
     {
         switch (block)
         {
@@ -240,7 +240,7 @@ public class NotionAPI
                 stringBuilder.AppendLine(string.Empty);
                 break;
             case CodeBlock codeBlock:
-                AppendCode(codeBlock, indent, stringBuilder);
+                AppendCode(codeBlock, indent, stringBuilder, languageCode);
                 stringBuilder.AppendLine(string.Empty);
                 break;
             case BulletedListItemBlock bulletListItemBlock:
@@ -281,7 +281,7 @@ public class NotionAPI
             {
                 foreach (Block childBlock in pagination.Results)
                 {
-                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder, centerImages);
+                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder, centerImages, languageCode);
                 }
 
                 if (!pagination.HasMore)
@@ -411,12 +411,22 @@ public class NotionAPI
         }
     }
 
-    void AppendCode(CodeBlock codeBlock, string indent, StringBuilder stringBuilder)
+    void AppendCode(CodeBlock codeBlock, string indent, StringBuilder stringBuilder, string languageCode)
     {
+        string filenameText = "Filename";
         // Use Notion codeblock caption as filename
         if(codeBlock.Code.Caption != null && codeBlock.Code.Caption.Any())
         {
-            stringBuilder.Append("<p align=\"center\" style=\"margin-bottom:-10px\"><strong>Filename:</strong><code>");
+            switch (languageCode)
+            {
+                case "fr":
+                    filenameText = "Nom du fichier ";
+                    break;
+                default:
+                    break;
+            }
+
+            stringBuilder.Append($"<p align=\"center\" style=\"margin-bottom:-10px\"><strong>{filenameText}:</strong><code>");
 
             var fileName = codeBlock.Code.Caption.First();
             AppendRichText(fileName, stringBuilder);
