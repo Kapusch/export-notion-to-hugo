@@ -148,17 +148,6 @@ public class NotionAPI
         }
         #endregion
 
-        #region Internal CSS
-
-        stringBuilder.AppendLine("<style>");
-        if (centerImages)
-        {
-            stringBuilder.AppendLine(".img-sizes{min-height:50px;max-height:600px;min-width:50px;max-width:600px;height:auto;width:auto}");
-        }
-        stringBuilder.AppendLine("</style>");
-
-        #endregion
-
         #region Main Content
         var paginatedBlocks = await client.Blocks.RetrieveChildrenAsync(page.Id);
         do
@@ -354,7 +343,7 @@ public class NotionAPI
         {
             var (fileName, _) = await DownloadFile(url, outputDirectory);
 
-            stringBuilder.Append("<figure>");
+            #region Image
 
             if (centerImages)
                 stringBuilder.Append("<p align=\"center\">");
@@ -362,18 +351,27 @@ public class NotionAPI
                 stringBuilder.Append("<p>");
 
 
-            stringBuilder.Append($"<img class=\"img-sizes\" src=\"./images/{fileName}\"></p>");
+            stringBuilder.AppendLine($"<img max-width=\"100%\" max-height=\"100%\" src=\"./images/{fileName}\" /></p>");
+
+            #endregion
+
+            #region Caption
+
+            stringBuilder.Append("<figure>");
 
             foreach (var richText in imageBlock.Image.Caption)
             {
                 AppendRichText(richText, captionText);
             }
+
             caption = captionText.ToString();
 
             if (!String.IsNullOrWhiteSpace(caption))
                 stringBuilder.Append($"<figcaption class=\"image-caption\">{caption}</figcaption>");
 
             stringBuilder.Append("</figure>");
+
+            #endregion
         }
     }
 
