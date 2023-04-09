@@ -70,8 +70,11 @@ public class NotionAPI
 
                             if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Subcategory.ToString()], out parsedPageSubcategory))
                             {
-                                isPartOfSeries = true;
-                                stringBuilder.AppendLine($"series: [\"{parsedPageSubcategory}\"]");
+                                if (!String.IsNullOrEmpty(parsedPageSubcategory))
+                                {
+                                    isPartOfSeries = true;
+                                    stringBuilder.AppendLine($"series: [\"{parsedPageSubcategory}\"]");
+                                }
                             }
                         }
                         break;
