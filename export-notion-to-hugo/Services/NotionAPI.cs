@@ -142,12 +142,12 @@ public class NotionAPI
         stringBuilder.AppendLine("draft: false");
 
         stringBuilder.AppendLine("---");
-        stringBuilder.AppendLine(String.Empty);
+        stringBuilder.AppendLine();
 
         if (useDescriptionAsSummary)
         {
             stringBuilder.AppendLine("<!--more-->");
-            stringBuilder.AppendLine(String.Empty);
+            stringBuilder.AppendLine();
         }
         #endregion
 
@@ -200,8 +200,6 @@ public class NotionAPI
                 {
                     AppendRichText(text, stringBuilder);
                 }
-
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case HeadingOneBlock h1:
                 stringBuilder.Append($"{indent}# ");
@@ -209,7 +207,6 @@ public class NotionAPI
                 {
                     AppendRichText(text, stringBuilder);
                 }
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case HeadingTwoBlock h2:
                 stringBuilder.Append($"{indent}## ");
@@ -217,7 +214,6 @@ public class NotionAPI
                 {
                     AppendRichText(text, stringBuilder);
                 }
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case HeadingThreeeBlock h3:
                 stringBuilder.Append($"{indent}### ");
@@ -225,15 +221,12 @@ public class NotionAPI
                 {
                     AppendRichText(text, stringBuilder);
                 }
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case ImageBlock imageBlock:
                 await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder, centerImages);
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case CodeBlock codeBlock:
                 AppendCode(codeBlock, indent, stringBuilder, languageCode);
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case BulletedListItemBlock bulletListItemBlock:
                 AppendBulletListItem(bulletListItemBlock, indent, stringBuilder);
@@ -249,7 +242,6 @@ public class NotionAPI
                 break;
             case FileBlock fileBlock:
                 await AppendFileAsync(fileBlock, indent, outputDirectory, stringBuilder);
-                stringBuilder.AppendLine(string.Empty);
                 break;
             case DividerBlock dividerBlock:
                 AppendHorizontalRule(stringBuilder);
@@ -477,7 +469,7 @@ public class NotionAPI
             AppendRichText(fileName, stringBuilder);
 
             stringBuilder.AppendLine("</code></p>");
-            stringBuilder.AppendLine(string.Empty);
+            stringBuilder.AppendLine();
         }
 
         stringBuilder.AppendLine($"{indent}```{NotionCodeLanguageToMarkdownCodeLanguage(codeBlock.Code.Language)}");
@@ -485,9 +477,9 @@ public class NotionAPI
         {
             stringBuilder.Append(indent);
             AppendRichText(richText, stringBuilder);
-            stringBuilder.AppendLine(string.Empty);
+            stringBuilder.AppendLine();
         }
-        stringBuilder.AppendLine($"{indent}```");
+        stringBuilder.Append($"{indent}```");
     }
 
     string NotionCodeLanguageToMarkdownCodeLanguage(string language)
@@ -535,7 +527,7 @@ public class NotionAPI
     /// <param name="stringBuilder"></param>
     void AppendCallout(CalloutBlock calloutBlock, string indent, StringBuilder stringBuilder)
     {
-        stringBuilder.AppendLine(string.Empty);
+        stringBuilder.AppendLine();
 
         StringBuilder calloutText = new();
         CalloutTypes calloutType = CalloutTypes.note;
@@ -567,7 +559,7 @@ public class NotionAPI
             AppendRichText(richText, calloutText);
         }
         stringBuilder.AppendLine($"{indent}{calloutText.ToString()}");
-        stringBuilder.AppendLine($"{indent}{{{{< /admonition >}}}}");
+        stringBuilder.Append($"{indent}{{{{< /admonition >}}}}");
     }
 
     /// <summary>
@@ -601,7 +593,7 @@ public class NotionAPI
 
             await DownloadFile(url, outputDirectory, fileName);
 
-            stringBuilder.AppendLine(
+            stringBuilder.Append(
                 $"{indent}{{{{< link " +
                 $"href=\"./files/{fileName}\" " +
                 $"content=\"{fileName}\" " +
