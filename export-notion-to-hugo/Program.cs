@@ -79,21 +79,28 @@ string BuildOutputDirectory(string baseOutput, Page page)
     string pageIndex = String.Empty;
     if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Index.ToString()], out var parsedPageIndex))
     {
-        pageIndex = parsedPageIndex + "-";
+        if (!String.IsNullOrEmpty(parsedPageIndex))
+        {
+            pageIndex = parsedPageIndex + "-";
+        }
     }
 
+    // The topic of a page is used as the post URL
     string pageTopic = String.Empty;
     if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Topic.ToString()], out var parsedTopic))
     {
         pageTopic = parsedTopic;
     }
 
+    // The category of a page will classify the post as a tuto or a tip
     string pageCategory = String.Empty;
     if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Category.ToString()], out var parsedCategory))
     {
         pageCategory = parsedCategory;
     }
 
+    // If the page has a sub-category, it will be used as a sub-path to classify
+    // the post as within a serie
     string pageSubcategory = String.Empty;
     if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Subcategory.ToString()], out var parsedSubcategory))
     {

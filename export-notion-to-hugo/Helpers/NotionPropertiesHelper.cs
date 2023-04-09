@@ -23,12 +23,11 @@ namespace Helpers
                     }
                     break;
                 case SelectPropertyValue selectPropertyValue:
-                    text = selectPropertyValue.Select.Name;
+                    text = selectPropertyValue.Select?.Name ?? String.Empty;
                     break;
                 case NumberPropertyValue numberPropertyValue:
                     text = numberPropertyValue.Number?.ToString();
                     break;
-
                 default:
                     return false;
             }
