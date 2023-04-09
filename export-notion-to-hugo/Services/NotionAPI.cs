@@ -248,6 +248,9 @@ public class NotionAPI
                 await AppendFileAsync(fileBlock, indent, outputDirectory, stringBuilder);
                 stringBuilder.AppendLine(string.Empty);
                 break;
+            case DividerBlock dividerBlock:
+                AppendHorizontalRule(stringBuilder);
+                break;
             default:
                 string currentPageId = String.Empty;
 
@@ -284,6 +287,11 @@ public class NotionAPI
                 });
             } while (true);
         }
+    }
+
+    void AppendHorizontalRule(StringBuilder stringBuilder)
+    {
+        stringBuilder.Append("___");
     }
 
     void AppendRichText(RichTextBase richText, StringBuilder stringBuilder)
