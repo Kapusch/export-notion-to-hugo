@@ -157,7 +157,7 @@ public class NotionAPI
         {
             foreach (Block block in paginatedBlocks.Results)
             {
-                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages, languageCode);
+                await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages, languageCode, false);
             }
 
             if (!paginatedBlocks.HasMore)
@@ -172,7 +172,7 @@ public class NotionAPI
         } while (true);
         #endregion
 
-        #region Serie table of content
+        #region Series table of content
 
         if (isPartOfSeries)
         {
@@ -191,7 +191,7 @@ public class NotionAPI
 
     #region MarkDown Helpers
 
-    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages, string languageCode)
+    async Task AppendBlockLineAsync(Block block, string indent, string outputDirectory, StringBuilder stringBuilder, bool centerImages, string languageCode, bool isTableColumnHeader)
     {
         switch (block)
         {
@@ -254,6 +254,12 @@ public class NotionAPI
             case DividerBlock dividerBlock:
                 AppendHorizontalRule(stringBuilder);
                 break;
+            case TableBlock tableBlock:
+                isTableColumnHeader = tableBlock.Table.HasColumnHeader;
+                break;
+            case TableRowBlock tableRowBlock:
+                AppendTableRow(tableRowBlock, isTableColumnHeader, stringBuilder);
+                break;
             default:
                 string currentPageId = String.Empty;
 
@@ -267,7 +273,7 @@ public class NotionAPI
                 break;
         }
 
-        stringBuilder.AppendLine(string.Empty);
+        stringBuilder.AppendLine();
 
         if (block.HasChildren)
         {
@@ -276,7 +282,10 @@ public class NotionAPI
             {
                 foreach (Block childBlock in pagination.Results)
                 {
-                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder, centerImages, languageCode);
+                    await AppendBlockLineAsync(childBlock, $"    {indent}", outputDirectory, stringBuilder, centerImages, languageCode, isTableColumnHeader);
+
+                    // Only add column header to first TableRowBlock when parsing TableBlock children
+                    if (isTableColumnHeader) isTableColumnHeader = false;
                 }
 
                 if (!pagination.HasMore)
@@ -289,6 +298,33 @@ public class NotionAPI
                     StartCursor = pagination.NextCursor,
                 });
             } while (true);
+        }
+    }
+
+    void AppendTableRow(TableRowBlock tableRowBlock, bool isTableColumnHeader, StringBuilder stringBuilder)
+    {
+        stringBuilder.Append("| ");
+
+        foreach (var cell in tableRowBlock.TableRow.Cells)
+        {
+            foreach (var richText in cell)
+            {
+                AppendRichText(richText, stringBuilder);
+            }
+
+            stringBuilder.Append(" | ");
+        }
+
+        if (isTableColumnHeader)
+        {
+            stringBuilder.AppendLine();
+
+            for (int i = 0; i < tableRowBlock.TableRow.Cells.Count(); i++)
+            {
+                stringBuilder.Append("| --- ");
+            }
+
+            stringBuilder.Append("|");
         }
     }
 
