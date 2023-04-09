@@ -99,8 +99,6 @@ string BuildOutputDirectory(string baseOutput, Page page)
         pageCategory = parsedCategory;
     }
 
-    // If the page has a sub-category, it will be used as a sub-path to classify
-    // the post as within a serie
     string pageSubcategory = String.Empty;
     if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Subcategory.ToString()], out var parsedSubcategory))
     {
@@ -137,7 +135,12 @@ void AddIndexFiles(string baseOutput)
                 Path.GetFileName(subcategoryFolder)
                 ?? throw new ApplicationException("Not a valid directory name");
 
-            AddIndexFile(subcategoryFolder, subcategory);
+            // If the page has a sub-category, it will be used as a sub-path to classify
+            // the post as within a serie
+            if (Char.IsDigit(subcategory[0]))
+            {
+                AddIndexFile(subcategoryFolder, subcategory);
+            }
         }
     }
 }
