@@ -98,7 +98,7 @@ public class NotionAPI
                             // so that the pages are ordered correctly within a serie.
                             if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Index.ToString()], out var parsedPageIndex))
                             {
-                                dateTime = dateTime.AddSeconds(int.Parse(parsedPageIndex));
+                                dateTime = dateTime.AddSeconds(int.Parse(parsedPageIndex ?? "0"));
                             }
 
                             parsedValue = $"\"{dateTime.ToString("u")}\"";

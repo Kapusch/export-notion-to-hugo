@@ -56,7 +56,11 @@ try
 }
 catch (Exception ex)
 {
+#if DEBUG
+    Console.WriteLine(ex);
+#else
     LogHelper.PrintError(ex.Message);
+#endif
     Exit();
 }
 
