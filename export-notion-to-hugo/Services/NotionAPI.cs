@@ -176,7 +176,7 @@ public class NotionAPI
 
         if (isPartOfSeries)
         {
-            stringBuilder.AppendLine("---");
+            stringBuilder.AppendLine("___");
             if(languageCode == "fr")
                 stringBuilder.AppendLine("Plus d'articles dans la même série:");
             else
@@ -200,6 +200,7 @@ public class NotionAPI
                 {
                     AppendRichText(text, stringBuilder);
                 }
+                stringBuilder.AppendLine();
                 break;
             case HeadingOneBlock h1:
                 stringBuilder.Append($"{indent}# ");
@@ -350,6 +351,10 @@ public class NotionAPI
         else if (richText.Annotations.IsItalic)
         {
             text = $"*{text}*";
+        }
+        else if (richText.Annotations.IsUnderline)
+        {
+            text = $"<u>{text}</u>";
         }
 
         if (richText.Annotations.IsStrikeThrough)
