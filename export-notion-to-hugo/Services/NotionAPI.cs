@@ -231,12 +231,15 @@ public class NotionAPI
                 break;
             case BulletedListItemBlock bulletListItemBlock:
                 AppendBulletListItem(bulletListItemBlock, indent, stringBuilder);
+                stringBuilder.AppendLine();
                 break;
             case NumberedListItemBlock numberedListItemBlock:
                 AppendNumberedListItem(numberedListItemBlock, indent, stringBuilder);
+                stringBuilder.AppendLine();
                 break;
             case ToDoBlock todoBlock:
                 AppendTodoListItem(todoBlock, indent, stringBuilder);
+                stringBuilder.AppendLine();
                 break;
             case CalloutBlock calloutBlock:
                 AppendCallout(calloutBlock, indent, stringBuilder);
