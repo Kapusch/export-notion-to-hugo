@@ -225,6 +225,7 @@ public class NotionAPI
                 break;
             case ImageBlock imageBlock:
                 await AppendImageAsync(imageBlock, indent, outputDirectory, stringBuilder, centerImages);
+                stringBuilder.AppendLine();
                 break;
             case CodeBlock codeBlock:
                 AppendCode(codeBlock, indent, stringBuilder, languageCode);
