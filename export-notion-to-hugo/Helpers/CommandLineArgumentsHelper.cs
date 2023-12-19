@@ -17,12 +17,6 @@ public static class CommandLineArgumentsHelper
         Arguments parameters = new();
         var parameterNames = (parameters.GetType()).GetProperties().Select(q => q.Name);
 
-        // There is one optional parameter
-        if (arguments.Length != parameterNames.Count()-1)
-        {
-            throw new ArgumentException($"{arguments.Length} found arguments instead of 3");
-        }
-
         foreach (var argument in arguments)
         {
             if (!parameterNames.Any(parameterName => argument.StartsWith(parameterName)))

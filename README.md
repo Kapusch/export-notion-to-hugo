@@ -24,9 +24,14 @@ The program is optimized to work with a minimum set of properties from your Noti
 - (Status) **Status**: the status of your page.
 
 ### Run the program
-Download the project and run the program with the following command:
+You can either export all pages from a DataBase matching with a specific status...
 ```bash
 dotnet run "NotionApiToken={YOUR_API_KEY}" "DatabaseId={YOUR_DATABASE_ID}" "Status={YOUR_PAGE_STATUS}"
+```
+
+...or only export a subset of pages.
+```bash
+dotnet run "NotionApiToken={YOUR_API_KEY}" "PageIds={{PAGE_ID_1};{PAGE_ID_2}}"
 ```
 
 **Note:** you can also specify the output folder with adding the parameter `"TmpFolder={YOUR_FOLDER_PATH}"` to your command.

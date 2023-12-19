@@ -14,12 +14,23 @@ try
     parameters = CommandLineArgumentsHelper.ParseCommandLineArguments(args);
     notionAPI = new(parameters.NotionApiToken);
 
-    List<Page> test = new List<Page>();
-    // NOTE: Uncomment for debugging a specific page export
-    //test.Add(await notionAPI.GetPageById("753688cef4674473b8380b7f56a19827"));
+    List<Page> pagesRetrievedFromNotion;
 
-    var pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId, parameters.Status);
-    foreach (var page in test.Count == 0 ? pagesRetrievedFromNotion.Results : test)
+    // NOTE: Uncomment and adapt for debugging specific page(s) export
+    //parameters.PageIds = "<PAGE_ID_1>;<PAGE_ID_2>";
+
+    if (parameters.PageIds is not null)
+    {
+        string[] pageIds = parameters.PageIds.Split(';', StringSplitOptions.TrimEntries);
+        pagesRetrievedFromNotion = await notionAPI.GetPagesFromDatabase(pageIds);
+    }
+    else
+    {
+        var paginatedList = await notionAPI.GetPagesFromDatabase(parameters.DatabaseId, parameters.Status);
+        pagesRetrievedFromNotion = (paginatedList ?? new PaginatedList<Page>()).Results;
+    }
+
+    foreach (var page in pagesRetrievedFromNotion)
     {
         string outputDirectory = BuildOutputDirectory(parameters.TmpFolder, page);
         if (!Directory.Exists(outputDirectory))

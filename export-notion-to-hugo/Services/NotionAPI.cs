@@ -25,12 +25,39 @@ public class NotionAPI
 
     public async Task<Page> GetPageById(string id) => await client.Pages.RetrieveAsync(id);
 
+    /// <summary>
+    /// Retrieve all pages from a database with the targeted status
+    /// </summary>
+    /// <param name="databaseId"></param>
+    /// <param name="pageStatusFilter"></param>
+    /// <returns></returns>
     public async Task<PaginatedList<Page>> GetPagesFromDatabase(string databaseId, string pageStatusFilter)
     {
-        var statusFilter = new StatusFilter("Status", equal: pageStatusFilter);
+        var queryParams = new DatabasesQueryParameters();
 
-        var queryParams = new DatabasesQueryParameters { Filter = statusFilter };
+        if (!String.IsNullOrWhiteSpace(pageStatusFilter))
+        {
+            queryParams.Filter = new StatusFilter("Status", equal: pageStatusFilter);
+        }
+
         return await client.Databases.QueryAsync(databaseId, queryParams);
+    }
+
+    /// <summary>
+    /// Return all pages from a list of page IDs
+    /// </summary>
+    /// <param name="pageIds"></param>
+    /// <returns></returns>
+    public async Task<List<Page>> GetPagesFromDatabase(IEnumerable<string> pageIds)
+    {
+        var query = new List<Page>();
+
+        foreach (var pageId in pageIds)
+        {
+            query.Add(await GetPageById(pageId));
+        }
+
+        return query;
     }
 
     public async Task<string> ExportPageToMarkdown(Page page, string outputDirectory, bool centerImages = true)
