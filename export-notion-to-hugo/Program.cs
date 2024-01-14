@@ -98,7 +98,7 @@ string BuildOutputDirectory(string baseOutput, Page page)
 
     // The topic of a page is used as the post URL
     string pageTopic = String.Empty;
-    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.Topic.ToString()], out var parsedTopic))
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.URL.ToString()], out var parsedTopic))
     {
         pageTopic = parsedTopic;
     }

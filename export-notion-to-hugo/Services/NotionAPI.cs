@@ -81,7 +81,7 @@ public class NotionAPI
                 string parsedValue = String.Empty;
                 switch (Enum.Parse<Properties>(defaultProperty))
                 {
-                    case Properties.Topic:
+                    case Properties.URL:
                     case Properties.Title:
                     case Properties.Category:
                     case Properties.Subcategory:
