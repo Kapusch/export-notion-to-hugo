@@ -96,11 +96,10 @@ string BuildOutputDirectory(string baseOutput, Page page)
         }
     }
 
-    // The topic of a page is used as the post URL
-    string pageTopic = String.Empty;
-    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.URL.ToString()], out var parsedTopic))
+    string postURL = String.Empty;
+    if (NotionPropertiesHelper.TryParseAsPlainText(page.Properties[Properties.PostURL.ToString()], out var parsedURL))
     {
-        pageTopic = parsedTopic;
+        postURL = parsedURL;
     }
 
     // The category of a page will classify the post as a tuto or a tip
@@ -121,7 +120,7 @@ string BuildOutputDirectory(string baseOutput, Page page)
         "posts",
         pageCategory ?? "Misc",
         pageSubcategory,
-        pageIndex + (pageTopic ?? page.Id));
+        pageIndex + (postURL ?? page.Id));
 }
 
 /// <summary>

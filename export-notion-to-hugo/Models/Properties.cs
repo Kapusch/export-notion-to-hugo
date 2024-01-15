@@ -3,7 +3,7 @@ namespace Models
 {
     enum Properties
     {
-        URL,
+        PostURL,
         Title,
         Category,
         Subcategory,

@@ -11,8 +11,8 @@ Before getting started, you need to prepare some parameters:
 - **Page Status**: specify which pages to export with a given page status
 
 ### Notion page properties
-The program is optimized to work with a minimum set of properties from your Notion pages (the property type is mentioned in parenthesis):
-- (URL) **URL**: the URL of your post (also used as the folder name),
+The program is optimized to work with a minimum set of properties from your Notion pages (the Notion property type is mentioned in parenthesis):
+- (Text) **PostURL**: the URL of your post (also used as the folder name),
 - (Title) **Title**: the title of your post,
 - (Select) **Category**: the main category of your post,
 - (Select) **Subcategory**: the subcategory of your post,
