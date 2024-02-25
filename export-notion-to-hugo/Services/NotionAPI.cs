@@ -180,10 +180,15 @@ public class NotionAPI
 
         #region Main Content
         var paginatedBlocks = await client.Blocks.RetrieveChildrenAsync(page.Id);
+        bool isPreviousBlockEqualToTable = false;
         do
         {
             foreach (Block block in paginatedBlocks.Results)
             {
+                // Ensure a line is added after last row of a Table block
+                if (isPreviousBlockEqualToTable) stringBuilder.AppendLine();
+                isPreviousBlockEqualToTable = block.GetType() == typeof(TableBlock);
+
                 await AppendBlockLineAsync(block, string.Empty, outputDirectory, stringBuilder, centerImages, languageCode, false);
             }
 
